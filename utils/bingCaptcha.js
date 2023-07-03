@@ -16,10 +16,14 @@ export async function createCaptcha (e, tokenU) {
   return { id, image: base64String }
 }
 
-export async function solveCaptcha (id, text) {
+export async function solveCaptcha (id, text, token) {
   let baseUrl = Config.sydneyReverseProxy
   let url = `${baseUrl}/edgesvc/turing/captcha/verify?type=visual&id=${id}&regionId=1&value=${text}`
-  let res = await fetch(url)
+  let res = await fetch(url, {
+    headers: {
+      Cookie: '_U=' + token
+    }
+  })
   res = await res.json()
   if (res.solved) {
     return {

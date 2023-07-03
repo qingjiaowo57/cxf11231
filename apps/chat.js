@@ -1636,6 +1636,7 @@ export class chatgpt extends plugin {
             if (message && typeof message === 'string' && message.indexOf('CaptchaChallenge') > -1) {
               let { id, image } = await createCaptcha(e, bingToken)
               e.bingCaptchaId = id
+              e.token = bingToken
               return {
                 text: '请崽60秒内输入下面图片以通过必应人机验证',
                 image,
@@ -2332,7 +2333,7 @@ export class chatgpt extends plugin {
   async solveBingCaptcha (e) {
     let id = e.bingCaptchaId
     let text = e.msg
-    let solveResult = await solveCaptcha(id, text)
+    let solveResult = await solveCaptcha(id, text, e.token)
     if (solveResult.result) {
       await e.reply('验证码已通过')
     } else {
