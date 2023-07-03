@@ -21,7 +21,7 @@ export async function solveCaptcha (id, text) {
   let url = `${baseUrl}/edgesvc/turing/captcha/verify?type=visual&id=${id}&regionId=1&value=${text}`
   let res = await fetch(url)
   res = await res.json()
-  if (res.reason === 'Solved') {
+  if (res.solved) {
     return {
       result: true,
       detail: res

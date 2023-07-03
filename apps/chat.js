@@ -999,7 +999,7 @@ export class chatgpt extends plugin {
         return false
       }
       if (chatMessage.image) {
-        this.setContext('solveBingCaptcha', true, 60)
+        this.setContext('solveBingCaptcha', false, 60)
         await e.reply([chatMessage.text, segment.image(`base64://${chatMessage.image}`)])
         return
       }
