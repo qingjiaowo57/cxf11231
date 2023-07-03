@@ -65,6 +65,7 @@ import { SendMusicTool } from '../utils/tools/SendMusicTool.js'
 import { SendDiceTool } from '../utils/tools/SendDiceTool.js'
 import { SendAvatarTool } from '../utils/tools/SendAvatarTool.js'
 import { SendMessageToSpecificGroupOrUserTool } from '../utils/tools/SendMessageToSpecificGroupOrUserTool.js'
+import {createCaptcha, solveCaptcha} from "../utils/bingCaptcha.js";
 
 try {
   await import('emoji-strip')
@@ -997,6 +998,11 @@ export class chatgpt extends plugin {
         // 字数超限直接返回
         return false
       }
+      if (chatMessage.image) {
+        this.setContext('solveBingCaptcha', true, 60)
+        await e.reply([chatMessage.text, segment.image(`base64://${chatMessage.image}`)])
+        return
+      }
       if (use !== 'api3' && use !== 'poe' && use !== 'claude') {
         previousConversation.conversation = {
           conversationId: chatMessage.conversationId
@@ -1627,7 +1633,16 @@ export class chatgpt extends plugin {
           } catch (error) {
             logger.error(error)
             const message = error?.message || error?.data?.message || error || '出错了'
-            if (message && typeof message === 'string' && message.indexOf('限流') > -1) {
+            if (message && typeof message === 'string' && message.indexOf('CaptchaChallenge') > -1) {
+              let { id, image } = await createCaptcha(e, bingToken)
+              e.bingCaptchaId = id
+              return {
+                text: '请崽60秒内输入下面图片以通过必应人机验证',
+                image,
+                error: true,
+                token: bingToken
+              }
+            } else if (message && typeof message === 'string' && message.indexOf('限流') > -1) {
               throttledTokens.push(bingToken)
               let bingTokens = JSON.parse(await redis.get('CHATGPT:BING_TOKENS'))
               const badBingToken = bingTokens.findIndex(element => element.Token === bingToken)
@@ -2312,6 +2327,18 @@ export class chatgpt extends plugin {
       sendMessageOption = Object.assign(sendMessageOption, conversation)
     }
     return await this.chatGPTApi.sendMessage(prompt, sendMessageOption)
+  }
+
+  async solveBingCaptcha (e) {
+    let id = e.bingCaptchaId
+    let text = e.msg
+    let solveResult = await solveCaptcha(id, text)
+    if (solveResult.result) {
+      await e.reply('验证码已通过')
+    } else {
+      await e.reply('验证码失败：' + JSON.stringify(solveResult.detail))
+    }
+    this.finish('solveBingCaptcha')
   }
 }
 
