@@ -65,7 +65,7 @@ import { SendMusicTool } from '../utils/tools/SendMusicTool.js'
 import { SendDiceTool } from '../utils/tools/SendDiceTool.js'
 import { SendAvatarTool } from '../utils/tools/SendAvatarTool.js'
 import { SendMessageToSpecificGroupOrUserTool } from '../utils/tools/SendMessageToSpecificGroupOrUserTool.js'
-import {createCaptcha, solveCaptcha} from "../utils/bingCaptcha.js";
+import { createCaptcha, solveCaptcha } from '../utils/bingCaptcha.js'
 
 try {
   await import('emoji-strip')
@@ -1844,7 +1844,7 @@ export class chatgpt extends plugin {
               admin: 'group administrator'
             }
             if (chats) {
-              system += `There is the conversation history in the group, you must chat according to the conversation history context"`
+              system += 'There is the conversation history in the group, you must chat according to the conversation history context"'
               system += chats
                 .map(chat => {
                   let sender = chat.sender || {}
@@ -2009,9 +2009,10 @@ export class chatgpt extends plugin {
             prompt += `\nthe url of the picture(s) above: ${img.join(', ')}`
           } else {
             tools.push(new SerpImageTool())
-            tools.push(...[new SearchVideoTool(),
-              new SendVideoTool(),
-              new EliMusicTool()])
+            tools.push(...[
+              new SearchVideoTool(),
+              new SendVideoTool()
+            ])
           }
           let funcMap = {}
           let fullFuncMap = {}
